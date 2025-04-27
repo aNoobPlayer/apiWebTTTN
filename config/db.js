@@ -15,7 +15,7 @@ const pool = mysql.createPool({
   queueLimit: 0, 
   ssl: {
     ca: fs.existsSync('./ca.pem') ? fs.readFileSync('./ca.pem') : undefined,
-    rejectUnauthorized: true,
+    rejectUnauthorized: false,
   },
 });
 
