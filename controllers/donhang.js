@@ -46,19 +46,41 @@ export const getDonHang = async (req, res) => {
 export const getDonHangById = async (req, res) => {
   try {
     const { maDH } = req.params;
-    const [donhangRows] = await pool.query('SELECT * FROM DONHANG WHERE MaDH = ?', [maDH]);
-    const [chitietRows] = await pool.query('SELECT * FROM CHITIETDONHANG WHERE MaDH = ?', [maDH]);
 
-    if (donhangRows.length === 0) {
+    const [rows] = await pool.query(`
+      SELECT 
+        d.MaDH, d.MaKH, d.NgayDat, d.NgayGiao,
+        c.MaSP, c.DonGia, c.VAT, c.SoLuong
+      FROM DONHANG d
+      LEFT JOIN CHITIETDONHANG c ON d.MaDH = c.MaDH
+      WHERE d.MaDH = ?
+    `, [maDH]);
+
+    if (rows.length === 0) {
       return res.status(404).json({
         status: 'error',
         message: 'DonHang not found'
       });
     }
 
+    // Tách phần đơn hàng
+    const { MaKH, NgayDat, NgayGiao } = rows[0];
+    const chitiet = rows.map(row => ({
+      MaSP: row.MaSP,
+      DonGia: row.DonGia,
+      VAT: row.VAT,
+      SoLuong: row.SoLuong
+    }));
+
     res.status(200).json({
       status: 'success',
-      data: { ...donhangRows[0], chitiet: chitietRows }
+      data: {
+        MaDH: maDH,
+        MaKH,
+        NgayDat,
+        NgayGiao,
+        chitiet
+      }
     });
   } catch (err) {
     res.status(500).json({
@@ -68,6 +90,7 @@ export const getDonHangById = async (req, res) => {
     });
   }
 };
+
 
 export const createDonHang = async (req, res) => {
   const connection = await pool.getConnection();
