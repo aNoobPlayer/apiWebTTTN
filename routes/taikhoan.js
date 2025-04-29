@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTaiKhoan, getTaiKhoanById, createTaiKhoan, updateTaiKhoan, deleteTaiKhoan,getPassword } from '../controllers/taikhoan.js';
+import { getTaiKhoan, getTaiKhoanById, createTaiKhoan, updateTaiKhoan, deleteTaiKhoan,getPassword,loginTaiKhoan } from '../controllers/taikhoan.js';
 
 const router = express.Router();
 
