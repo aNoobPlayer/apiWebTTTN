@@ -2,17 +2,17 @@ import pool from '../config/db.js';
 
 export const getTaiKhoan = async (req, res) => {
   try {
-    const { page = 1, size = 10, trinhTrang, search } = req.query;
+    const { page = 1, size = 10, tinhTrang, search } = req.query;
     const offset = (page - 1) * size;
 
-    let query = 'SELECT MaTK, MaKH, TenTK, TrinhTrang, NgayTao FROM TAIKHOAN WHERE 1=1';
+    let query = 'SELECT MaTK, MaKH, TenTK, tinhTrang, NgayTao FROM TAIKHOAN WHERE 1=1';
     let countQuery = 'SELECT COUNT(*) as total FROM TAIKHOAN WHERE 1=1';
     const params = [];
 
-    if (trinhTrang) {
-      query += ' AND TrinhTrang = ?';
-      countQuery += ' AND TrinhTrang = ?';
-      params.push(trinhTrang);
+    if (tinhTrang) {
+      query += ' AND TinhTrang = ?';
+      countQuery += ' AND TinhTrang = ?';
+      params.push(tinhTrang);
     }
 
     if (search) {
@@ -46,7 +46,7 @@ export const getTaiKhoan = async (req, res) => {
 export const getTaiKhoanById = async (req, res) => {
   try {
     const { maTK } = req.params;
-    const [rows] = await pool.query('SELECT MaTK, MaKH, TenTK, TrinhTrang, NgayTao FROM TAIKHOAN WHERE MaTK = ?', [maTK]);
+    const [rows] = await pool.query('SELECT MaTK, MaKH, TenTK, TinhTrang, NgayTao FROM TAIKHOAN WHERE MaTK = ?', [maTK]);
 
     if (rows.length === 0) {
       return res.status(404).json({
@@ -70,9 +70,9 @@ export const getTaiKhoanById = async (req, res) => {
 
 export const createTaiKhoan = async (req, res) => {
   try {
-    const { maTK, maKH, tenTK, trinhTrang, ngayTao, matKhau } = req.body;
+    const { maTK, maKH, tenTK, tinhTrang, ngayTao, matKhau } = req.body;
 
-    if (!maTK || !maKH || !tenTK || !trinhTrang || !ngayTao || !matKhau) {
+    if (!maTK || !maKH || !tenTK || !tinhTrang || !ngayTao || !matKhau) {
       return res.status(400).json({
         status: 'error',
         message: 'Missing required fields'
@@ -101,13 +101,13 @@ export const createTaiKhoan = async (req, res) => {
     // const hashedPassword = await bcrypt.hash(matKhau, 10);
 
     await pool.query(
-      'INSERT INTO TAIKHOAN (MaTK, MaKH, TenTK, TrinhTrang, NgayTao, MatKhau) VALUES (?, ?, ?, ?, ?, ?)',
-      [maTK, maKH, tenTK, trinhTrang, ngayTao, matKhau] // Thay matKhau bằng hashedPassword nếu băm
+      'INSERT INTO TAIKHOAN (MaTK, MaKH, TenTK, TinhTrang, NgayTao, MatKhau) VALUES (?, ?, ?, ?, ?, ?)',
+      [maTK, maKH, tenTK, tinhTrang, ngayTao, matKhau] // Thay matKhau bằng hashedPassword nếu băm
     );
 
     res.status(201).json({
       status: 'success',
-      data: { maTK, maKH, tenTK, trinhTrang, ngayTao }
+      data: { maTK, maKH, tenTK, tinhTrang, ngayTao }
     });
   } catch (err) {
     res.status(500).json({
@@ -121,7 +121,7 @@ export const createTaiKhoan = async (req, res) => {
 export const updateTaiKhoan = async (req, res) => {
   try {
     const { maTK } = req.params;
-    const { maKH, tenTK, trinhTrang, ngayTao, matKhau } = req.body;
+    const { maKH, tenTK, tinhTrang, ngayTao, matKhau } = req.body;
 
     // Kiểm tra MaKH nếu có
     if (maKH) {
@@ -152,8 +152,8 @@ export const updateTaiKhoan = async (req, res) => {
     // }
 
     const [result] = await pool.query(
-      'UPDATE TAIKHOAN SET MaKH = ?, TenTK = ?, TrinhTrang = ?, NgayTao = ?, MatKhau = ? WHERE MaTK = ?',
-      [maKH, tenTK, trinhTrang, ngayTao, matKhau, maTK] // Thay matKhau bằng hashedPassword nếu băm
+      'UPDATE TAIKHOAN SET MaKH = ?, TenTK = ?, tinhTrang = ?, NgayTao = ?, MatKhau = ? WHERE MaTK = ?',
+      [maKH, tenTK, tinhTrang, ngayTao, matKhau, maTK] // Thay matKhau bằng hashedPassword nếu băm
     );
 
     if (result.affectedRows === 0) {
@@ -165,7 +165,7 @@ export const updateTaiKhoan = async (req, res) => {
 
     res.status(200).json({
       status: 'success',
-      data: { maTK, maKH, tenTK, trinhTrang, ngayTao }
+      data: { maTK, maKH, tenTK, tinhTrang, ngayTao }
     });
   } catch (err) {
     res.status(500).json({
