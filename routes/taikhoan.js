@@ -22,5 +22,5 @@ router.delete('/:maTK', deleteTaiKhoan);
 router.get('/:maTK/password', getPassword);
 
 // POST /api/login
-router.post('/taikhoan/login', loginTaiKhoan);
+router.post('/login', loginTaiKhoan);
 export default router;
