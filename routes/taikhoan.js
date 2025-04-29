@@ -1,5 +1,5 @@
 import express from 'express';
-import { getTaiKhoan, getTaiKhoanById, createTaiKhoan, updateTaiKhoan, deleteTaiKhoan } from '../controllers/taikhoan.js';
+import { getTaiKhoan, getTaiKhoanById, createTaiKhoan, updateTaiKhoan, deleteTaiKhoan,getPassword } from '../controllers/taikhoan.js';
 
 const router = express.Router();
 
@@ -18,4 +18,6 @@ router.put('/:maTK', updateTaiKhoan);
 // DELETE /api/taikhoan/:maTK
 router.delete('/:maTK', deleteTaiKhoan);
 
+// In taikhoan.js
+router.get('/:maTK/password', getPassword);
 export default router;

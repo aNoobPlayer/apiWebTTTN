@@ -67,6 +67,13 @@ export const getTaiKhoanById = async (req, res) => {
     });
   }
 };
+// In controllers/taikhoan.js
+export const getPassword = async (req, res) => {
+  if (!req.user.isAdmin) return res.status(403).json({ message: 'Unauthorized' });
+  const taiKhoan = await TaiKhoan.findOne({ maTK: req.params.maTK }).select('password');
+  if (!taiKhoan) return res.status(404).json({ message: 'Account not found' });
+  res.json({ password: taiKhoan.password });
+};
 
 export const createTaiKhoan = async (req, res) => {
   try {
