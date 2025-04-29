@@ -113,10 +113,11 @@ export const createSanPham = async (req, res) => {
         message: 'Gia must be greater than 0'
       });
     }
+    const loaiSPValue = loaiSP ?? null;
 
     await pool.query(
       'INSERT INTO SANPHAM (MaSP, TenSP, MaDM, LoaiSP, Gia, HinhAnh, SoLuongTon, MoTa) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [maSP, tenSP, maDM, loaiSP, gia, hinhAnh, soLuongTon, moTa]
+      [maSP, tenSP, maDM, loaiSPValue, gia, hinhAnh, soLuongTon, moTa]
     );
 
     res.status(201).json({
