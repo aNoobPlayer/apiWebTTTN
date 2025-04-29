@@ -67,12 +67,29 @@ export const getTaiKhoanById = async (req, res) => {
     });
   }
 };
-// In controllers/taikhoan.js
 export const getPassword = async (req, res) => {
-  if (!req.user.isAdmin) return res.status(403).json({ message: 'Unauthorized' });
-  const taiKhoan = await TaiKhoan.findOne({ maTK: req.params.maTK }).select('password');
-  if (!taiKhoan) return res.status(404).json({ message: 'Account not found' });
-  res.json({ password: taiKhoan.password });
+  try {
+    const { maTK } = req.params;
+    const [rows] = await pool.query('SELECT MatKhau FROM TAIKHOAN WHERE MaTK = ?', [maTK]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({
+        status: 'error',
+        message: 'TaiKhoan not found'
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { matKhau: rows[0].MatKhau }
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to fetch password',
+      errors: err.message
+    });
+  }
 };
 
 export const createTaiKhoan = async (req, res) => {
