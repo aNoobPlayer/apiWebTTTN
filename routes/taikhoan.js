@@ -18,6 +18,9 @@ router.put('/:maTK', updateTaiKhoan);
 // DELETE /api/taikhoan/:maTK
 router.delete('/:maTK', deleteTaiKhoan);
 
-// In taikhoan.js
+// GET /api/taikhoan/:maTK/password
 router.get('/:maTK/password', getPassword);
+
+// POST /api/login
+router.post('/taikhoan/login', loginTaiKhoan);
 export default router;

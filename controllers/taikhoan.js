@@ -91,7 +91,41 @@ export const getPassword = async (req, res) => {
     });
   }
 };
+export const loginTaiKhoan = async (req, res) => {
+  try {
+    const { tenTK, matKhau } = req.body;
 
+    if (!tenTK || !matKhau) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Missing username or password',
+      });
+    }
+
+    const [rows] = await pool.query(
+      'SELECT MaTK, TenTK, MaKH, MatKhau FROM TAIKHOAN WHERE TenTK = ?',
+      [tenTK]
+    );
+
+    if (rows.length === 0 || rows[0].MatKhau !== matKhau) {
+      return res.status(401).json({
+        status: 'error',
+        message: 'Invalid username or password',
+      });
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: { maTK: rows[0].MaTK, tenTK: rows[0].TenTK, maKH: rows[0].MaKH },
+    });
+  } catch (err) {
+    res.status(500).json({
+      status: 'error',
+      message: 'Failed to login',
+      errors: err.message,
+    });
+  }
+};
 export const createTaiKhoan = async (req, res) => {
   try {
     const { maTK, maKH, tenTK, tinhTrang, ngayTao, matKhau } = req.body;
