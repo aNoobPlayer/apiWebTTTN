@@ -98,7 +98,7 @@ export const getDanhGiaBySanPham = async (req, res) => {
 
 export const createSanPham = async (req, res) => {
   try {
-    const { maSP, tenSP, maDM, loaiSP, gia, hinhAnh, soLuongTon, moTa } = req.body;
+    const { maSP, tenSP, maDM, loaiSP ='', gia, hinhAnh, soLuongTon, moTa } = req.body;
 
     if (!maSP || !tenSP || !maDM || !gia) {
       return res.status(400).json({
