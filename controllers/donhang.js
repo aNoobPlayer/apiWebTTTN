@@ -97,9 +97,9 @@ export const createDonHang = async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const { maDH, maKH, ngayDat, ngayGiao, chitiet } = req.body;
+    const { maKH, ngayDat, ngayGiao, chitiet } = req.body;
 
-    if (!maDH || !maKH || !ngayDat || !chitiet || !Array.isArray(chitiet)) {
+    if (!maKH || !ngayDat || !chitiet || !Array.isArray(chitiet)) {
       await connection.rollback();
       return res.status(400).json({
         status: 'error',
@@ -107,7 +107,7 @@ export const createDonHang = async (req, res) => {
       });
     }
 
-    // Kiểm tra MaKH tồn tại
+    // Validate MaKH
     const [khachHang] = await connection.query('SELECT MaKH FROM KHACHHANG WHERE MaKH = ?', [maKH]);
     if (khachHang.length === 0) {
       await connection.rollback();
@@ -118,10 +118,11 @@ export const createDonHang = async (req, res) => {
     }
 
     // Insert DONHANG
-    await connection.query(
-      'INSERT INTO DONHANG (MaDH, MaKH, NgayDat, NgayGiao) VALUES (?, ?, ?, ?)',
-      [maDH, maKH, ngayDat, ngayGiao]
+    const [result] = await connection.query(
+      'INSERT INTO DONHANG (MaKH, NgayDat, NgayGiao) VALUES (?, ?, ?)',
+      [maKH, ngayDat, ngayGiao]
     );
+    const maDH = result.insertId; // Get auto-generated MaDH
 
     // Insert CHITIETDONHANG
     for (const item of chitiet) {
@@ -135,7 +136,7 @@ export const createDonHang = async (req, res) => {
         });
       }
 
-      // Kiểm tra MaSP tồn tại
+      // Validate MaSP
       const [sanPham] = await connection.query('SELECT MaSP FROM SANPHAM WHERE MaSP = ?', [maSP]);
       if (sanPham.length === 0) {
         await connection.rollback();
@@ -158,6 +159,7 @@ export const createDonHang = async (req, res) => {
     });
   } catch (err) {
     await connection.rollback();
+    console.error('Create DonHang Error:', err); // Add logging
     res.status(500).json({
       status: 'error',
       message: 'Failed to create donhang',
