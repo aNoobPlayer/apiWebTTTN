@@ -97,13 +97,24 @@ export const createDonHang = async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    const { maKH, ngayDat, ngayGiao, chitiet } = req.body;
+    const { maDH, maKH, ngayDat, ngayGiao, chitiet } = req.body;
 
-    if (!maKH || !ngayDat || !chitiet || !Array.isArray(chitiet)) {
+    // Validate required fields
+    if (!maDH || !maKH || !ngayDat || !chitiet || !Array.isArray(chitiet)) {
       await connection.rollback();
       return res.status(400).json({
         status: 'error',
-        message: 'Missing required fields or invalid chitiet'
+        message: 'Missing required fields (maDH, maKH, ngayDat, chitiet) or invalid chitiet',
+      });
+    }
+
+    // Validate MaDH uniqueness
+    const [existingDonHang] = await connection.query('SELECT MaDH FROM DONHANG WHERE MaDH = ?', [maDH]);
+    if (existingDonHang.length > 0) {
+      await connection.rollback();
+      return res.status(400).json({
+        status: 'error',
+        message: 'MaDH already exists',
       });
     }
 
@@ -113,26 +124,25 @@ export const createDonHang = async (req, res) => {
       await connection.rollback();
       return res.status(400).json({
         status: 'error',
-        message: 'Invalid MaKH'
+        message: 'Invalid MaKH',
       });
     }
 
-    // Insert DONHANG
-    const [result] = await connection.query(
-      'INSERT INTO DONHANG (MaKH, NgayDat, NgayGiao) VALUES (?, ?, ?)',
-      [maKH, ngayDat, ngayGiao]
+    // Insert DONHANG with provided MaDH
+    await connection.query(
+      'INSERT INTO DONHANG (MaDH, MaKH, NgayDat, NgayGiao) VALUES (?, ?, ?, ?)',
+      [maDH, maKH, ngayDat, ngayGiao]
     );
-    const maDH = result.insertId; // Get auto-generated MaDH
 
     // Insert CHITIETDONHANG
     for (const item of chitiet) {
-      const { maSP, donGia, vat, soLuong } = item;
+      const { maSP, donGia, vat = 0, soLuong } = item;
 
       if (!maSP || !donGia || !soLuong || donGia <= 0 || soLuong < 0) {
         await connection.rollback();
         return res.status(400).json({
           status: 'error',
-          message: 'Invalid chitiet data'
+          message: 'Invalid chitiet data',
         });
       }
 
@@ -142,7 +152,7 @@ export const createDonHang = async (req, res) => {
         await connection.rollback();
         return res.status(400).json({
           status: 'error',
-          message: `Invalid MaSP: ${maSP}`
+          message: `Invalid MaSP: ${maSP}`,
         });
       }
 
@@ -155,15 +165,15 @@ export const createDonHang = async (req, res) => {
     await connection.commit();
     res.status(201).json({
       status: 'success',
-      data: { maDH, maKH, ngayDat, ngayGiao, chitiet }
+      data: { maDH, maKH, ngayDat, ngayGiao, chitiet },
     });
   } catch (err) {
     await connection.rollback();
-    console.error('Create DonHang Error:', err); // Add logging
+    console.error('Create DonHang Error:', err);
     res.status(500).json({
       status: 'error',
       message: 'Failed to create donhang',
-      errors: err.message
+      errors: err.message,
     });
   } finally {
     connection.release();
